@@ -19,11 +19,434 @@ namespace Lab3DM
 
         KarnoControlService service;
 
+        SymmetryList tablesSymmetry;
+        SymmetryList rowsSymmetry;
+
+        List<List<string>> indexes;
+        int[][] matrix;
+        List<Dot> neighbooredDots;
+
+        int y;
+
+        public Karno(int type)
+        {
+            InitializeComponent();
+            this.type = type;
+            if (type == 0) {
+                typeValid = '1';
+                typeInvalid = '0';
+            } else if (type == 1) {
+                typeValid = '0';
+                typeInvalid = '1';
+            }
+            Type = type == 0 ? "Карно ДНФ" : "Карно КНФ";
+            header1.Title = Type;
+            supportedTypes.Add(typeof(SNF));
+            inputGroupBox1.HandleButtonWith(buttonClick);
+            buttonAnotherSource1.setParent(this);
+            textBox1.KeyDown += TextBox1_KeyDown;
+            service = new KarnoControlService();
+        }
+
+        public void buttonClick(object sender, EventArgs e)
+        {
+            if (textBox1.Text == "") {
+                MessageBox.Show("Укажите функцию");
+                return;
+            }
+            tablesSymmetry = new SymmetryList();
+            rowsSymmetry = new SymmetryList();
+            neighbooredDots = new List<Dot>();
+            panelWork.Controls.Clear();
+            string function = textBox1.Text;
+            List<string> firstHalf = new List<string>();
+            List<string> secondHalf = new List<string>();
+            SplitFunction(function.Replace("*", "").Split('+')[0], out firstHalf, out secondHalf);
+
+            //Создание вертикальных и горизонтальных полос с лейблами
+            y = 0;
+            int tables = (int)Math.Pow(2, firstHalf.Count);
+            int rows = (int)Math.Pow(2, secondHalf.Count);
+
+            for (int i = 0; i < tables; i++) {
+                tablesSymmetry.Add(i);
+            }
+
+            for (int i = 0; i < rows; i++) {
+                rowsSymmetry.Add(i);
+            }
+
+            int xOffset = 25;
+            int x = xOffset * secondHalf.Count;
+            int width = (panelWork.Width - 10 * secondHalf.Count - x) / ((int)Math.Pow(2, firstHalf.Count) + 1);
+
+            x += width;
+
+            int height = 25;
+
+            matrix = new int[rows][];
+
+            for (int i = 0; i < rows; i++) {
+                matrix[i] = new int[tables];
+                for (int j = 0; j < tables; j++) {
+                    matrix[i][j] = -1;
+                }
+            }
+
+            int fhi = 1;
+
+            List<string> tablesName = new List<string>();
+            int z = 0;
+            foreach (string labelName in firstHalf) {
+                int interval = (int)Math.Pow(2, firstHalf.Count - fhi);
+                Label name = ControlService.CreateLabel(labelName, new Point(x, y));
+                panelWork.Controls.Add(name);
+                tablesName.Add("");
+                tablesName[z] = AddSomeSymbolsToString(tablesName[z], typeInvalid, interval);
+                for (int i = interval, j = 0; i < tables; i += 2 * interval, j++) {
+                    if (j % 2 == 1) {
+                        tablesName[z] = AddSomeSymbolsToString(tablesName[z], typeInvalid, 2 * interval);
+                        continue;
+                    }
+                    tablesName[z] = AddSomeSymbolsToString(tablesName[z], typeValid, 2 * interval);
+                    int newWidth = interval * 2 * width;
+                    int offset = x + i * width;
+                    newWidth = (offset + newWidth) > (tables * width + x) ? (tables - i) * width : newWidth;
+                    Label label = service.createHorizontalLabel(newWidth, new Point(offset, y));
+                    panelWork.Controls.Add(label);
+
+                    int l = i + interval - 1;
+                    for (int k = 0; k < interval * 2; k++) {
+                        tablesSymmetry.Get(l - k).Add(l + k + 1);
+                        if (tablesSymmetry.Contains(l + k + 1)) {
+                            tablesSymmetry.Get(l + k + 1).Add(l - k);
+                        }
+                    }
+                }
+                z++;
+                y += height;
+                fhi++;
+            }
+
+            y += height;
+            List<string> rowsName = new List<string>();
+            fhi = 0;
+            z = 0;
+            foreach (string labelName in secondHalf) {
+                int interval = (int)Math.Pow(2, secondHalf.Count - fhi - 1);
+                Label name = ControlService.CreateLabel(labelName, new Point(fhi * xOffset, y - 15), new Size(xOffset, 15));
+                name.TextAlign = ContentAlignment.MiddleLeft;
+                panelWork.Controls.Add(name);
+                rowsName.Add("");
+                rowsName[z] = AddSomeSymbolsToString(rowsName[z], typeInvalid, interval);
+                for (int i = interval, j = 0; i < rows; i += 2 * interval, j++) {
+                    if (j % 2 == 1) {
+                        rowsName[z] = AddSomeSymbolsToString(rowsName[z], typeInvalid, 2 * interval);
+                        continue;
+                    }
+                    rowsName[z] = AddSomeSymbolsToString(rowsName[z], typeValid, 2 * interval);
+                    int newHeight = interval * 2 * height;
+                    int offset = y + i * height;
+                    newHeight = (offset + newHeight) > (rows * height + y) ? (rows - i) * height : newHeight;
+                    Label label = service.createVerticalLabel(newHeight, new Point(fhi * xOffset, offset));
+                    panelWork.Controls.Add(label);
+
+                    int l = i + interval - 1;
+                    for (int k = 0; k < interval * 2; k++) {
+                        rowsSymmetry.Get(l - k).Add(l + k + 1);
+                        if (rowsSymmetry.Contains(l + k + 1)) {
+                            rowsSymmetry.Get(l + k + 1).Add(l - k);
+                        }
+                    }
+                }
+                z++;
+                fhi++;
+            }
+
+            y -= height;
+            x -= width;
+
+            List<string> completeRows = new List<string>();
+
+            for (int i = 0; i < rows; i++) {
+                string strRow = "";
+                foreach (string str in rowsName) {
+                    strRow += str[i];
+                }
+                completeRows.Add(strRow);
+            }
+
+            List<string> completeTables = new List<string>();
+
+            for (int i = 0; i < tables; i++) {
+                string strTable = "";
+                foreach (string str in tablesName) {
+                    strTable += str[i];
+                }
+                completeTables.Add(strTable);
+            }
+
+            indexes = new List<List<string>>();
+            indexes.Add(completeTables);
+            indexes.Add(completeRows);
+
+            for (int i = 0; i < rows + 1; i++) {
+                if (i == 0) {
+                    for (int j = 1; j < tables + 1; j++) {
+                        TextBox textBox = ControlService.CreateTextbox(indexes[0][j - 1], new Point(x + j * width, y), new Size(width, height));
+                        textBox.Name = "table_" + i + '_' + (j - 1);
+                        panelWork.Controls.Add(textBox);
+                    }
+                } else {
+                    for (int j = 0; j < tables + 1; j++) {
+                        TextBox textBox;
+                        if (j == 0) {
+                            textBox = ControlService.CreateTextbox(indexes[1][i - 1], new Point(x + j * width, y), new Size(width, height));
+                            textBox.Name = "row_" + i + '_' + j;
+                        } else {
+                            textBox = ControlService.CreateTextbox("", new Point(x + j * width, y), new Size(width, height));
+                            textBox.Name = "karno_first_" + (i - 1) + '_' + (j - 1);
+                        }
+                        panelWork.Controls.Add(textBox);
+                    }
+                }
+                y += height;
+            }
+            ParseFunction(function);
+            VisualizeNeighboors();
+            //CountIntervals();
+        }
+
+        private void CountIntervals()
+        {
+            List<Interval> intervals = new List<Interval>();
+            for (int i = 0; i < neighbooredDots.Count; i++) {
+                Dot one = neighbooredDots[i];
+                Interval interval = new Interval();
+                interval.Add(one.i, one.j, 0, 0);
+                //Бесконечный цикл для проверки симметричностей интервала
+                //TryToFindMaxIntervalFr()
+
+            }
+        }
+
+        private void VisualizeNeighboors()
+        {
+            int rows = matrix.Length;
+            int tables = matrix[0].Length;
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < tables; j++) {
+                    if (matrix[i][j] != -1) {
+                        int neigs = CountNeigsFor(i, j);
+                        SetTextBoxText(typeValid + "(" + neigs + ")", i, j);
+                        neighbooredDots.Add(new Dot(i, j, neigs));
+                    }
+                }
+            }
+            neighbooredDots.Sort((Dot a, Dot b) => {
+                if (a.neigs > b.neigs) {
+                    return 0;
+                } else if (a.neigs < b.neigs) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            });
+        }
+
+        private void SplitFunction(string part, out List<string> firstHalf, out List<string> secondHalf)
+        {
+            firstHalf = new List<string>();
+            secondHalf = new List<string>();
+
+            int half = (int)Math.Ceiling((double)part.Length / 2);
+
+            for (int i = 1; i <= half; i++) {
+                string var = i + "";
+                firstHalf.Add(var);
+            }
+
+            for (int i = half + 1; i <= part.Length; i++) {
+                string var = i + "";
+                secondHalf.Add(var);
+            }
+        }
+
+        private void ParseFunction(string function)
+        {
+            string[] parts = function.Replace("*", "").Replace("\r", "").Replace("\n", "").Split('+');
+
+            for (int k = 0; k < parts.Length; k++) {
+                string firstHalf;
+                string secondHalf;
+                SplitFunctionToBinary(parts[k], out firstHalf, out secondHalf);
+                int i = GetIFor(secondHalf);
+                int j = GetJFor(firstHalf);
+                matrix[i][j] = (int)char.GetNumericValue(typeValid);
+            }
+        }
+
+        private int CountNeigsFor(int row, int table)
+        {
+            return CountNeigsForRow(row, table) + CountNeigsForTable(row, table);
+        }
+
+        private int CountNeigsForTable(int row, int table)
+        {
+            int neigs = 0;
+
+            List<int> list = tablesSymmetry.Get(table).GetSymmetries();
+
+            int tables = matrix[0].Length;
+            for (int i = 0; i < tables; i++) {
+                if (!list.Contains(i)) {
+                    continue;
+                }
+                if (matrix[row][i] != -1) {
+                    neigs++;
+                }
+            }
+
+            int newTable = table + 1 >= matrix[row].Length ? 0 : table + 1;
+            if (matrix[row][newTable] != -1 && !list.Contains(newTable)) {
+                neigs++;
+            }
+            newTable = table - 1 < 0 ? matrix[row].Length - 1 : table - 1;
+            if (matrix[row][newTable] != -1 && !list.Contains(newTable)) {
+                neigs++;
+            }
+
+            return neigs;
+        }
+
+        private int CountNeigsForRow(int row, int table)
+        {
+            int neigs = 0;
+
+            List<int> list = rowsSymmetry.Get(row).GetSymmetries();
+
+            int rows = matrix.Length;
+            for (int i = 0; i < rows; i++) {
+                if (!list.Contains(i)) {
+                    continue;
+                }
+                if (matrix[i][table] != -1) {
+                    neigs++;
+                }
+            }
+            int newRow = row + 1 >= matrix.Length ? 0 : row + 1;
+            if (matrix[newRow][table] != -1 && !list.Contains(newRow)) {
+                neigs++;
+            }
+            newRow = row - 1 < 0 ? matrix.Length - 1 : row - 1;
+            if (matrix[newRow][table] != -1 && !list.Contains(newRow)) {
+                neigs++;
+            }
+
+            return neigs;
+        }
+
+        private void SplitFunctionToBinary(string part, out string firstHalf, out string secondHalf)
+        {
+            firstHalf = "";
+            secondHalf = "";
+
+            int half = (int)Math.Ceiling((double)part.Length / 2);
+
+            for (int i = 0; i < half; i++) {
+                firstHalf += part[i];
+            }
+
+            for (int i = half; i < part.Length; i++) {
+                secondHalf += part[i];
+            }
+        }
+
+        private void SetTextBoxText(string value, int i, int j)
+        {
+            TextBox textBox = FindFirstTextBox(i, j);
+            textBox.Text = value + "";
+        }
+
+        private TextBox FindFirstTextBox(int i, int j)
+        {
+            string lookingFor = "karno_first_" + i + '_' + j;
+            foreach (Control c in panelWork.Controls) {
+                if (c.Name.Equals(lookingFor)) {
+                    return (TextBox)c;
+                }
+            }
+            throw new ArgumentOutOfRangeException("Can't find control with name " + lookingFor);
+        }
+
+        private int GetIFor(string part)
+        {
+            List<string> anyRow = indexes[1];
+            for (int i = 0; i < anyRow.Count; i++) {
+                if (part == anyRow[i]) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private int GetJFor(string part)
+        {
+            for (int j = 0; j < indexes[0].Count; j++) {
+                if (part == indexes[0][j]) {
+                    return j;
+                }
+            }
+            return -1;
+        }
+
+        private string AddSomeSymbolsToString(string origin, char symbol, int interval)
+        {
+            for (int j = 0; j < interval; j++) {
+                origin += symbol;
+            }
+            return origin;
+        }
+
+        private void AddToAll(List<string> collection, char value, int iterator)
+        {
+            for (int i = 0; i < iterator; i++) {
+                for (int j = 0; j < collection.Count; j++) {
+                    collection[j] += value;
+                }
+            }
+        }
+
+        private void TextBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter) {
+                inputGroupBox1.FakeButtonPress();
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        protected override void fillFromPrevious()
+        {
+            if (previousOperation.GetType() == typeof(SNF)) {
+                SNF snf = (SNF)previousOperation;
+                textBox1.Text = ((SNFOutput)snf.getOutput()).getFunction();
+            }
+        }
+
+        /*int type;
+
+        char typeValid;
+        char typeInvalid;
+
+        KarnoControlService service;
+
         Dictionary<int, List<int>> tablesSymmetry;
         Dictionary<int, List<int>> rowsSymmetry;
 
         Dictionary<string, List<string>> matrix;
         int[][] matrixInt;
+
+        int y;
 
         public Karno(int type)
         {
@@ -60,7 +483,7 @@ namespace Lab3DM
             SplitFunction(function.Replace("*", "").Split('+')[0], out firstHalf, out secondHalf);
 
             //Создание вертикальных и горизонтальных полос с лейблами
-            int y = 0;
+            y = 0;
             int tables = (int)Math.Pow(2, firstHalf.Count);
             int rows = (int)Math.Pow(2, secondHalf.Count);
 
@@ -74,7 +497,10 @@ namespace Lab3DM
 
             int xOffset = 25;
             int x = xOffset * secondHalf.Count;
-            int width = (panelWork.Width - 10*secondHalf.Count - x) / (int)Math.Pow(2, firstHalf.Count);
+            int width = (panelWork.Width - 10*secondHalf.Count - x) / ((int)Math.Pow(2, firstHalf.Count)+1);
+
+            x += width;
+
             int height = 25;
 
             matrixInt = new int[rows][];
@@ -121,6 +547,7 @@ namespace Lab3DM
                 fhi++;
             }
 
+            y += height;
             List<string> rowsName = new List<string>();
             fhi = 0;
             z = 0;
@@ -155,6 +582,8 @@ namespace Lab3DM
                 fhi++;
             }
 
+            y -= height;
+            x -= width;
             matrix = new Dictionary<string, List<string>>();
 
             List<string> completeRows = new List<string>();
@@ -175,11 +604,25 @@ namespace Lab3DM
                 matrix.Add(strTable, completeRows);
             }
 
-            for (int i = 0; i < rows; i++) {
-                for (int j = 0; j < tables; j++) {
-                    TextBox textBox = ControlService.CreateTextbox("", new Point(x + j * width, y), new Size(width, height));
-                    textBox.Name = "karno_first_" + i + '_' + j;
-                    panelWork.Controls.Add(textBox);
+            for (int i = 0; i < rows + 1; i++) {
+                if (i == 0) {
+                    for (int j = 1; j < tables + 1; j++) {
+                        TextBox textBox = ControlService.CreateTextbox(matrix.ElementAt(j-1).Key, new Point(x + j * width, y), new Size(width, height));
+                        textBox.Name = "table_" + i + '_' + (j-1);
+                        panelWork.Controls.Add(textBox);
+                    }
+                } else {
+                    for (int j = 0; j < tables + 1; j++) {
+                        TextBox textBox;
+                        if (j == 0) {
+                            textBox = ControlService.CreateTextbox(matrix.First().Value[i-1], new Point(x + j * width, y), new Size(width, height));
+                            textBox.Name = "row_" + i + '_' + j;
+                        } else {
+                            textBox = ControlService.CreateTextbox("", new Point(x + j * width, y), new Size(width, height));
+                            textBox.Name = "karno_first_" + (i-1) + '_' + (j-1);
+                        }
+                        panelWork.Controls.Add(textBox);
+                    }
                 }
                 y += height;
             }
@@ -377,7 +820,7 @@ namespace Lab3DM
                 SNF snf = (SNF)previousOperation;
                 textBox1.Text = ((SNFOutput)snf.getOutput()).getFunction();
             }
-        }
+        }*/
 
     }
 }

@@ -59,6 +59,7 @@
     <Compile Include="ComputeSNF.cs" />
     <Compile Include="ComputeTruthTable.cs" />
     <Compile Include="ControlService.cs" />
+    <Compile Include="Dot.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,6 +78,8 @@
     <Compile Include="InputGroupBox.Designer.cs">
       <DependentUpon>InputGroupBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="Interval.cs" />
+    <Compile Include="IntervalDot.cs" />
     <Compile Include="IOutput.cs" />
     <Compile Include="IWindow.cs">
       <SubType>UserControl</SubType>
@@ -108,6 +111,8 @@
     <Compile Include="SNFOutput.cs" />
     <Compile Include="SNFService.cs" />
     <Compile Include="StringService.cs" />
+    <Compile Include="Symmetry.cs" />
+    <Compile Include="SymmetryList.cs" />
     <Compile Include="TruthTable.cs">
       <SubType>UserControl</SubType>
     </Compile>
