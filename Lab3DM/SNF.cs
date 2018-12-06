@@ -86,8 +86,8 @@ namespace Lab3DM
                     panelMatrix.Controls.Add(ControlService.CreateTextbox(
                         matrix == null? "" : matrix[i][j].ToString(),
                         new Point(j * width, i * height),
-                        new Size(width, height),
-                        false
+                        false,
+                        new Size(width, height)
                     ));
                 }
             }

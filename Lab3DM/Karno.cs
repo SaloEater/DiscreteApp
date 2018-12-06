@@ -24,10 +24,12 @@ namespace Lab3DM
 
         List<List<string>> indexes;
         int[][] matrix;
-        List<Dot> neighbooredDots;
+        List<DotWithNeigs> neighbooredDots;
+        List<Interval> intervals;
 
         int y;
-
+        int x;
+        Random rnd;
         public Karno(int type)
         {
             InitializeComponent();
@@ -46,6 +48,7 @@ namespace Lab3DM
             buttonAnotherSource1.setParent(this);
             textBox1.KeyDown += TextBox1_KeyDown;
             service = new KarnoControlService();
+            rnd = new Random();
         }
 
         public void buttonClick(object sender, EventArgs e)
@@ -56,7 +59,7 @@ namespace Lab3DM
             }
             tablesSymmetry = new SymmetryList();
             rowsSymmetry = new SymmetryList();
-            neighbooredDots = new List<Dot>();
+            neighbooredDots = new List<DotWithNeigs>();
             panelWork.Controls.Clear();
             string function = textBox1.Text;
             List<string> firstHalf = new List<string>();
@@ -77,7 +80,7 @@ namespace Lab3DM
             }
 
             int xOffset = 25;
-            int x = xOffset * secondHalf.Count;
+            x = xOffset * secondHalf.Count;
             int width = (panelWork.Width - 10 * secondHalf.Count - x) / ((int)Math.Pow(2, firstHalf.Count) + 1);
 
             x += width;
@@ -103,23 +106,29 @@ namespace Lab3DM
                 panelWork.Controls.Add(name);
                 tablesName.Add("");
                 tablesName[z] = AddSomeSymbolsToString(tablesName[z], typeInvalid, interval);
-                for (int i = interval, j = 0; i < tables; i += 2 * interval, j++) {
-                    if (j % 2 == 1) {
+                for (int intervalFirstIndex = interval, intervalIndex = 0; intervalFirstIndex < tables; intervalFirstIndex += 2 * interval, intervalIndex++) {
+                    if (intervalIndex % 2 == 1) {
                         tablesName[z] = AddSomeSymbolsToString(tablesName[z], typeInvalid, 2 * interval);
                         continue;
                     }
                     tablesName[z] = AddSomeSymbolsToString(tablesName[z], typeValid, 2 * interval);
                     int newWidth = interval * 2 * width;
-                    int offset = x + i * width;
-                    newWidth = (offset + newWidth) > (tables * width + x) ? (tables - i) * width : newWidth;
+                    int offset = x + intervalFirstIndex * width;
+                    bool intervalTooBig = (offset + newWidth) > (tables * width + x);
+                    newWidth = intervalTooBig ? (tables - intervalFirstIndex) * width : newWidth;
                     Label label = service.createHorizontalLabel(newWidth, new Point(offset, y));
                     panelWork.Controls.Add(label);
 
-                    int l = i + interval - 1;
-                    for (int k = 0; k < interval * 2; k++) {
-                        tablesSymmetry.Get(l - k).Add(l + k + 1);
-                        if (tablesSymmetry.Contains(l + k + 1)) {
-                            tablesSymmetry.Get(l + k + 1).Add(l - k);
+                    int intervalCenter = intervalFirstIndex + (intervalTooBig ? (int)Math.Ceiling((decimal)interval / 2) : interval) - 1;
+                    for (int indexInInterval = 0; indexInInterval < interval * 2; indexInInterval++) {
+                        try {
+                            if (tablesSymmetry.Get(intervalCenter - indexInInterval).ContainsSymmetry(intervalCenter + indexInInterval + 1)) {
+                                continue;
+                            }
+                            tablesSymmetry.Get(intervalCenter - indexInInterval).Add(intervalCenter + indexInInterval + 1);
+                            tablesSymmetry.Get(intervalCenter + indexInInterval + 1).Add(intervalCenter - indexInInterval);
+                        } catch (IndexOutOfRangeException e2) {
+                            break;
                         }
                     }
                 }
@@ -128,41 +137,50 @@ namespace Lab3DM
                 fhi++;
             }
 
+            tablesSymmetry.CutAllHigher(tables - 1);
+
             y += height;
             List<string> rowsName = new List<string>();
             fhi = 0;
             z = 0;
-            foreach (string labelName in secondHalf) {
-                int interval = (int)Math.Pow(2, secondHalf.Count - fhi - 1);
+            for (int m = secondHalf.Count - 1; m >= 0; m--){
+                string labelName = secondHalf[m];
+                int interval = (int)Math.Pow(2, secondHalf.Count - 1 - fhi);
                 Label name = ControlService.CreateLabel(labelName, new Point(fhi * xOffset, y - 15), new Size(xOffset, 15));
                 name.TextAlign = ContentAlignment.MiddleLeft;
                 panelWork.Controls.Add(name);
                 rowsName.Add("");
                 rowsName[z] = AddSomeSymbolsToString(rowsName[z], typeInvalid, interval);
-                for (int i = interval, j = 0; i < rows; i += 2 * interval, j++) {
-                    if (j % 2 == 1) {
+                for (int intervalFirstIndex = interval, intervalIndex = 0; intervalFirstIndex < rows; intervalFirstIndex += 2 * interval, intervalIndex++) {
+                    if (intervalIndex % 2 == 1) {
                         rowsName[z] = AddSomeSymbolsToString(rowsName[z], typeInvalid, 2 * interval);
                         continue;
                     }
                     rowsName[z] = AddSomeSymbolsToString(rowsName[z], typeValid, 2 * interval);
                     int newHeight = interval * 2 * height;
-                    int offset = y + i * height;
-                    newHeight = (offset + newHeight) > (rows * height + y) ? (rows - i) * height : newHeight;
+                    int offset = y + intervalFirstIndex * height;
+                    bool intervalTooBig = (offset + newHeight) > (rows * height + y);
+                    newHeight = intervalTooBig ? (rows - intervalFirstIndex) * height : newHeight;
                     Label label = service.createVerticalLabel(newHeight, new Point(fhi * xOffset, offset));
                     panelWork.Controls.Add(label);
 
-                    int l = i + interval - 1;
-                    for (int k = 0; k < interval * 2; k++) {
-                        rowsSymmetry.Get(l - k).Add(l + k + 1);
-                        if (rowsSymmetry.Contains(l + k + 1)) {
-                            rowsSymmetry.Get(l + k + 1).Add(l - k);
+                    int intervalCenter = intervalFirstIndex + (intervalTooBig ? (int)Math.Ceiling((decimal)interval/2) : interval) - 1;
+                    for (int indexInInterval = 0; indexInInterval < interval * 2; indexInInterval++) {
+                        try {
+                            if (rowsSymmetry.Get(intervalCenter - indexInInterval).ContainsSymmetry(intervalCenter + indexInInterval + 1)) {
+                                continue;
+                            }
+                            rowsSymmetry.Get(intervalCenter - indexInInterval).Add(intervalCenter + indexInInterval + 1);
+                            rowsSymmetry.Get(intervalCenter + indexInInterval + 1).Add(intervalCenter - indexInInterval);
+                        } catch(IndexOutOfRangeException e2) {
+                            break;
                         }
                     }
                 }
                 z++;
                 fhi++;
             }
-
+            rowsSymmetry.CutAllHigher(rows - 1);
             y -= height;
             x -= width;
 
@@ -173,7 +191,7 @@ namespace Lab3DM
                 foreach (string str in rowsName) {
                     strRow += str[i];
                 }
-                completeRows.Add(strRow);
+                completeRows.Add(new string(strRow.ToCharArray().Reverse().ToArray()));
             }
 
             List<string> completeTables = new List<string>();
@@ -193,7 +211,7 @@ namespace Lab3DM
             for (int i = 0; i < rows + 1; i++) {
                 if (i == 0) {
                     for (int j = 1; j < tables + 1; j++) {
-                        TextBox textBox = ControlService.CreateTextbox(indexes[0][j - 1], new Point(x + j * width, y), new Size(width, height));
+                        TextBox textBox = ControlService.CreateTextbox(indexes[0][j - 1], new Point(x + j * width, y), true, new Size(width, height));
                         textBox.Name = "table_" + i + '_' + (j - 1);
                         panelWork.Controls.Add(textBox);
                     }
@@ -201,10 +219,10 @@ namespace Lab3DM
                     for (int j = 0; j < tables + 1; j++) {
                         TextBox textBox;
                         if (j == 0) {
-                            textBox = ControlService.CreateTextbox(indexes[1][i - 1], new Point(x + j * width, y), new Size(width, height));
+                            textBox = ControlService.CreateTextbox(indexes[1][i - 1], new Point(x + j * width, y), true, new Size(width, height));
                             textBox.Name = "row_" + i + '_' + j;
                         } else {
-                            textBox = ControlService.CreateTextbox("", new Point(x + j * width, y), new Size(width, height));
+                            textBox = ControlService.CreateTextbox("", new Point(x + j * width, y), true, new Size(width, height));
                             textBox.Name = "karno_first_" + (i - 1) + '_' + (j - 1);
                         }
                         panelWork.Controls.Add(textBox);
@@ -214,20 +232,308 @@ namespace Lab3DM
             }
             ParseFunction(function);
             VisualizeNeighboors();
-            //CountIntervals();
+            CountIntervals();
+            VisualizeIntervals();
+            MakeAnswer();
+        }
+
+        private void MakeAnswer()
+        {
+            string answer = "";
+
+            foreach (Interval interval in intervals)
+            {
+                List<Dot> dots = interval.createDots();
+                List<string> stringDots = new List<string>();
+                foreach (Dot dot in dots) {
+                    stringDots.Add(indexes[0][dot.table] + indexes[1][dot.row]);
+                }
+
+                int length = stringDots[0].Length;
+                for (int i = 0; i < length; i++) {
+                    bool oneFound = false,
+                        zeroFound = false;
+
+                    foreach(string str in stringDots) {
+                        if(str[i] == '1') {
+                            oneFound = true;
+                        }
+                        if (str[i] == '0') {
+                            zeroFound = true;
+                        }
+                        if (oneFound && zeroFound) {
+                            break;
+                        }
+                    }
+
+                    if (oneFound && zeroFound) {
+                        for (int j = 0; j < stringDots.Count; j++) {
+                            char[] str = stringDots[j].ToCharArray();
+                            str[i] = '-';
+                            stringDots[j] = string.Join("", str);
+                        }
+                    }
+                }
+
+                string result = "";
+
+                for(int i = 0; i < stringDots[0].Length; i++) {
+                    if(stringDots[0][i] == '-') {
+                        continue;
+                    }
+                    if(typeValid == '1') {
+                        if (stringDots[0][i] == typeValid) {
+                            result += "x" + (i + 1);
+                        } else if (stringDots[0][i] == typeInvalid) {
+                            result += "x" + (i + 1) + "_";
+                        }
+                    } else if(typeValid == '0') {
+                        if (stringDots[0][i] == typeInvalid) {
+                            result += "x" + (i + 1);
+                        } else if (stringDots[0][i] == typeValid) {
+                            result += "x" + (i + 1) + "_";
+                        }
+                    }
+                    result += '*';
+                }
+
+                answer += result + "+";
+            }
+
+            if (answer.Length < 2) {
+                textBoxResult.Text = "Невозможно построить ответ";
+            } else {
+                textBoxResult.Text = answer.Remove(answer.Length - 2, 2);
+            }
+        }
+
+        private void VisualizeIntervals()
+        {
+            Label label = ControlService.CreateLabel(
+                "Были найдены следующие интервалы:",
+                new Point(x, y)
+            );
+            panelWork.Controls.Add(label);
+
+            y += label.Height;
+
+            int i = 0;
+            foreach (Interval interval in intervals)
+            {    
+
+                List<TextBox> textBoxes = new List<TextBox>();
+
+                foreach (Dot dot in interval.createDots()) {
+                    textBoxes.Add(FindFirstTextBox(dot.row, dot.table));
+                }
+
+                Label panel = ControlService.CreateLabel(
+                    interval.makeString(),
+                    new Point(x, y)
+                );
+                panel.Font = new Font(FontFamily.GenericMonospace, 11);
+                Color color = Color.FromArgb(rnd.Next(256), rnd.Next(256), rnd.Next(256));
+                panel.BackColor = color;
+                panel.MouseHover += (object sender, EventArgs e) =>
+                {
+                    foreach (TextBox textBox in textBoxes)
+                    {
+                        textBox.BackColor = color;
+                    }
+                };
+                panel.MouseLeave += (object sender, EventArgs e) =>
+                {
+                    foreach(TextBox textBox in textBoxes)
+                        {
+                        textBox.BackColor = Color.White;
+                    }
+                };
+
+                y += panel.Height;
+                panelWork.Controls.Add(panel);
+                i++;
+            }
         }
 
         private void CountIntervals()
         {
-            List<Interval> intervals = new List<Interval>();
+            intervals = new List<Interval>();
+            List<Dot> forbidden = new List<Dot>();
             for (int i = 0; i < neighbooredDots.Count; i++) {
-                Dot one = neighbooredDots[i];
-                Interval interval = new Interval();
-                interval.Add(one.i, one.j, 0, 0);
+                DotWithNeigs one = neighbooredDots[i];
+                bool cont = false;
+                foreach(Dot dot in forbidden) {
+                    if (dot.Equals(one)) {
+                        cont = true;
+                        break;
+                    }
+                }
+                if (cont) {
+                    continue;
+                }
+                Interval interval = new Interval(new Dot(one.row, one.table));
                 //Бесконечный цикл для проверки симметричностей интервала
-                //TryToFindMaxIntervalFr()
-
+                interval = TryToFindMaxIntervalFor(interval);
+                Dot origin = interval.getOrigin();
+                foreach (IntervalShift shift in interval.getShifts()) {
+                    forbidden.Add(shift.ApplyOn(origin, false));
+                }
+                Console.WriteLine("{0}: {1} and has {2}", i, interval.ToString(), one.neigs);
+                intervals.Add(interval);
             }
+        }
+
+        private Interval TryToFindMaxIntervalFor(Interval interval)
+        {
+            Dot first = interval.getOrigin();
+            List<Interval> allFoundIntervals = new List<Interval>();
+            //Cтолбцы
+            Symmetry tables = tablesSymmetry.Get(first.table);
+            foreach (int table in tables.GetSymmetries()) {
+                bool valid = true;
+                Dot tableOrigin = new Dot(first.row, table);
+                if (interval.HasReferenceTo(tableOrigin)) {
+                    continue;
+                }
+                List<IntervalShift> shifts = interval.getShifts();
+                List<Dot> edited = new List<Dot>();
+                foreach (IntervalShift shift in shifts) {
+                    Dot dot = shift.ApplyOn(tableOrigin, false, true);
+                    try {
+                        int value = matrix[dot.row][dot.table];
+                        if (value == -1 /*|| value == -2*/) {
+                            throw new IndexOutOfRangeException();
+                        } else {
+                            //matrix[dot.row][dot.table] = -2;
+                            edited.Add(dot);
+                        }
+                    } catch (IndexOutOfRangeException e) {
+                        valid = false;
+                        break;
+                    }
+                }
+                if (valid) {
+                    Interval newInterval = IntervalFactory.CreateCopy(interval);
+                    newInterval.CopyAndMoveHalfOnTable(table - first.table);
+                    newInterval = TryToFindMaxIntervalFor(newInterval);
+                    allFoundIntervals.Add(newInterval);
+                } 
+                /*foreach (Dot dot in edited) {
+                    matrix[dot.row][dot.table] = 0;
+                }*/
+            }
+
+            //Cтроки
+            Symmetry rows = rowsSymmetry.Get(first.row);
+            foreach (int row in rows.GetSymmetries()) {
+                bool valid = true;
+                Dot tableOrigin = new Dot(row, first.table);
+                if (interval.HasReferenceTo(tableOrigin)) {
+                    continue;
+                }
+                bool inverted = true;// row > first.row ? true : false;
+                List<IntervalShift> shifts = interval.getShifts();
+                List<Dot> edited = new List<Dot>();
+                foreach (IntervalShift shift in shifts) {
+                    Dot dot = shift.ApplyOn(tableOrigin, true, false);
+                    try {
+                        int value = matrix[dot.row][dot.table];
+                        if (value == -1 /*|| value == -2*/) {
+                            throw new IndexOutOfRangeException();
+                        } else {
+                            //matrix[dot.row][dot.table] = -2;
+                            edited.Add(dot);
+                        }
+                    } catch (IndexOutOfRangeException e) {
+                        valid = false;
+                        break;
+                    }
+                }
+                if (valid) {
+                    Interval newInterval = IntervalFactory.CreateCopy(interval);
+                    newInterval.CopyAndMoveHalfOnRow(row - first.row);
+                    newInterval = TryToFindMaxIntervalFor(newInterval);
+                    allFoundIntervals.Add(newInterval);
+                }
+                /*foreach (Dot dot in edited) {
+                    matrix[dot.row][dot.table] = 0;
+                }*/
+            }
+
+            List<IntervalShift> sides = new List<IntervalShift>() {
+                new IntervalShift(0, 1),
+                new IntervalShift(0, -1),
+                new IntervalShift(-1, 0),
+                new IntervalShift(1, 0),
+            };
+            /*for (int i = 0; i < sides.Count; i++) {
+                IntervalShift shift = sides[i];
+                if (interval.Contains(shift)) {
+                    sides.Remove(shift);
+                    i--;
+                }
+            }*/
+
+            foreach (IntervalShift direction in sides) {
+                Dot edge = interval.getEdgeInDirectrion(direction);
+                Dot newEdge = direction.ApplyOn(edge, false);
+                Dot origin = new Dot(newEdge.row + (edge.row - interval.getOrigin().row), newEdge.table + (edge.table - interval.getOrigin().table));
+                List<IntervalShift> shifts = interval.getShifts();
+                List<Dot> edited = new List<Dot>();
+                bool valid = true;
+                //bool overlap = false;
+                bool invert = false;
+                foreach (IntervalShift shift in shifts) {
+                    Dot dot = null;
+                    if (direction.offsetI != 0) {
+                        dot = shift.ApplyOn(origin, true, false);
+                    } else if (direction.offsetJ != 0) {
+                        dot = shift.ApplyOn(origin, false, true);
+                    } else
+                    {
+                        dot = origin;
+                    }
+                    try {
+                        int value = matrix[dot.row][dot.table];
+                        if (value == -1) {
+                            throw new IndexOutOfRangeException();
+                        } else {
+                            /*if (value == -2) {
+                                overlap = true;
+                            }*/
+                            //matrix[dot.row][dot.table] = -2;
+                            edited.Add(dot);
+                        }
+                    } catch (IndexOutOfRangeException e) {
+                        valid = false;
+                        break;
+                    }
+                }
+                if (valid) {
+                    Interval newInterval = IntervalFactory.CreateCopy(interval);
+                    newInterval.MirrorAround(direction, origin);
+                    //if (!overlap) {
+                        newInterval = TryToFindMaxIntervalFor(newInterval);
+                    //}
+                    allFoundIntervals.Add(newInterval);
+                } 
+                /*foreach (Dot dot in edited) {
+                    matrix[dot.row][dot.table] = 0;
+                }*/
+            }
+
+            if (allFoundIntervals.Count > 0) {
+                int biggestIndex = 0;
+                int biggest = allFoundIntervals[biggestIndex].getShifts().Count;
+                for (int i = 1; i < allFoundIntervals.Count; i++) {
+                    if (allFoundIntervals[i].getShifts().Count > biggest) {
+                        biggestIndex = i;
+                    }
+                }
+                interval = allFoundIntervals[biggestIndex];
+            }
+
+            return interval;
         }
 
         private void VisualizeNeighboors()
@@ -239,11 +545,11 @@ namespace Lab3DM
                     if (matrix[i][j] != -1) {
                         int neigs = CountNeigsFor(i, j);
                         SetTextBoxText(typeValid + "(" + neigs + ")", i, j);
-                        neighbooredDots.Add(new Dot(i, j, neigs));
+                        neighbooredDots.Add(new DotWithNeigs(i, j, neigs));
                     }
                 }
             }
-            neighbooredDots.Sort((Dot a, Dot b) => {
+            neighbooredDots.Sort((DotWithNeigs a, DotWithNeigs b) => {
                 if (a.neigs > b.neigs) {
                     return 0;
                 } else if (a.neigs < b.neigs) {

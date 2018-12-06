@@ -10,7 +10,7 @@ namespace Lab3DM
 {
     public static class ControlService
     {
-        public static TextBox CreateTextbox(string text, Point? location = null, Size? size = null, bool readOnly = true)
+        public static TextBox CreateTextbox(string text, Point? location = null, bool readOnly = true, Size? size = null)
         {
             TextBox textBox = new TextBox();
             if (location != null) {
@@ -32,9 +32,26 @@ namespace Lab3DM
 
             if (size != null) {
                 label.Size = size.Value;
+            } else
+            {
+                label.AutoSize = true;
             }
 
             return label;
+        }
+
+        internal static Panel CreateOutputPanel(string labelText, Point location)
+        {
+            Panel panel = new Panel();
+            panel.Location = location;
+
+            Label label = CreateLabel(labelText, new Point(5, 5));
+
+            panel.Controls.Add(label);
+
+            panel.Size = new Size(label.Width + 10, label.Height + 10);
+
+            return panel;
         }
     }
 }

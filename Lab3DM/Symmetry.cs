@@ -9,22 +9,22 @@ namespace Lab3DM
     class Symmetry
     {
         int index;
-        List<int> symmetries;
+        List<int> items;
 
         public Symmetry(int index)
         {
             this.index = index;
-            symmetries = new List<int>();
+            items = new List<int>();
         }
 
         public void Add(int point)
         {
-            symmetries.Add(point);
+            items.Add(point);
         }
 
         public List<int> GetSymmetries()
         {
-            return symmetries;
+            return items;
         }
 
         internal bool Is(int index)
@@ -35,6 +35,31 @@ namespace Lab3DM
         public int Get()
         {
             return index;
+        }
+
+        internal void CutAllHigher(int index)
+        {
+            for(int i = 0; i < items.Count; i++) {
+                if (items[i] > index) {
+                    items.RemoveAt(i);
+                    i = -1;
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return "(" + index + "):" + string.Join(":", items);
+        }
+
+        internal bool ContainsSymmetry(int lookingFor)
+        {
+            foreach (int symm in items) {
+                if (symm == lookingFor) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

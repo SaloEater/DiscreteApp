@@ -42,7 +42,7 @@ namespace Lab3DM
 
                 value += i == iLen - 1 ? "" : "+";
             }
-            if(value[value.Length-1]=='+') {
+            if(value.Length > 0 && value[value.Length-1]=='+') {
                 value = value.Substring(0, value.Length - 1);
             }
         }

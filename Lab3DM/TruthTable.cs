@@ -61,12 +61,14 @@ namespace Lab3DM
                     panelResult.Controls.Add(ControlService.CreateTextbox(
                         matrix[i][j].ToString(),
                         new Point(j * width, i*height),
+                        true,
                         new Size(width, height)
                     ));
                 }
                 panelResult.Controls.Add(ControlService.CreateTextbox(
                        function[i] + "",
                        new Point(tables * width, i * height),
+                       true,
                        new Size(width, height)
                    ));
             }

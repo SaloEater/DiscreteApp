@@ -1,14 +1,31 @@
-﻿namespace Lab3DM
+﻿using System;
+
+namespace Lab3DM
 {
     internal class Dot
     {
-        public int i, j, neigs;
+        public int row, table;
 
-        public Dot(int i, int j, int neigs)
+        public Dot(int row, int table)
         {
-            this.i = i;
-            this.j = j;
-            this.neigs = neigs;
+            this.row = row;
+            this.table = table;
+        }
+
+        public override bool Equals(object obj)
+        {
+            Dot dot = (Dot)obj;
+            return row == dot.row && table == dot.table;
+        }
+
+        public override string ToString()
+        {
+            return row + ":" + table;
+        }
+
+        internal Dot Increment()
+        {
+            return new Dot(row + 1, table + 1);
         }
     }
 }

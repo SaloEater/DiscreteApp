@@ -32,9 +32,9 @@
             this.таблицаИстинностиToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.сДНФToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.сКНФToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
             this.карноКНФToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.карноДНФToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -81,15 +81,6 @@
             this.сКНФToolStripMenuItem.Text = "СКНФ";
             this.сКНФToolStripMenuItem.Click += new System.EventHandler(this.сКНФToolStripMenuItem_Click);
             // 
-            // tabControl1
-            // 
-            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 24);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(800, 426);
-            this.tabControl1.TabIndex = 1;
-            // 
             // карноКНФToolStripMenuItem
             // 
             this.карноКНФToolStripMenuItem.Name = "карноКНФToolStripMenuItem";
@@ -104,6 +95,15 @@
             this.карноДНФToolStripMenuItem.Text = "Карно ДНФ";
             this.карноДНФToolStripMenuItem.Click += new System.EventHandler(this.карноДНФToolStripMenuItem_Click);
             // 
+            // tabControl1
+            // 
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Location = new System.Drawing.Point(0, 24);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(800, 426);
+            this.tabControl1.TabIndex = 1;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -113,7 +113,7 @@
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Дискретный модуль";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);

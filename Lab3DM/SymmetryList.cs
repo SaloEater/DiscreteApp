@@ -38,5 +38,23 @@ namespace Lab3DM
             }
             throw new IndexOutOfRangeException();
         }
+
+        public List<Symmetry> GetSymmetries()
+        {
+            return symmetries;
+        }
+
+        internal void CutAllHigher(int index)
+        {
+            for(int i = 0; i < symmetries.Count; i++) {
+                Symmetry symmetry = symmetries[i];
+                symmetry.CutAllHigher(index);
+            }
+        }
+
+        public override string ToString()
+        {
+            return string.Join(",", symmetries);
+        }
     }
 }
