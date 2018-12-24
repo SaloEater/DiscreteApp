@@ -102,7 +102,7 @@ namespace Lab3DM
             int z = 0;
             foreach (string labelName in firstHalf) {
                 int interval = (int)Math.Pow(2, firstHalf.Count - fhi);
-                Label name = ControlService.CreateLabel(labelName, new Point(x, y));
+                Label name = ControlService.CreateLabel(firstHalf[firstHalf.Count-z-1], new Point(x, y));
                 panelWork.Controls.Add(name);
                 tablesName.Add("");
                 tablesName[z] = AddSomeSymbolsToString(tablesName[z], typeInvalid, interval);
@@ -201,7 +201,7 @@ namespace Lab3DM
                 foreach (string str in tablesName) {
                     strTable += str[i];
                 }
-                completeTables.Add(strTable);
+                completeTables.Add(new string(strTable.ToCharArray().Reverse().ToArray()));
             }
 
             indexes = new List<List<string>>();
@@ -750,7 +750,7 @@ namespace Lab3DM
         Dictionary<int, List<int>> rowsSymmetry;
 
         Dictionary<string, List<string>> matrix;
-        int[][] matrixInt;
+        List<List<int>> matrixInt;
 
         int y;
 

@@ -50,5 +50,20 @@ namespace Lab3DM
         {
             AddTabPageWith(new Karno(0));
         }
+
+        private void квайнМКДНФToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddTabPageWith(new Kvaine(0));
+        }
+
+        private void квайнМККНФToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddTabPageWith(new Kvaine(1));
+        }
+
+        private void таблицаПокрытийToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddTabPageWith(new TableDecompose());
+        }
     }
 }

@@ -60,7 +60,7 @@ namespace Lab3DM
             int tables = int.Parse(textBoxVars.Text);
             int rows = (int)Math.Pow(2, tables);
 
-            this.tables = tables;
+            this.tables = tables + 1;
             this.rows = rows;
            
 
