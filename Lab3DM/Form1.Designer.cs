@@ -35,9 +35,8 @@
             this.карноДНФToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.карноКНФToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.квайнМКДНФToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.квайнМККНФToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
             this.таблицаПокрытийToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -60,7 +59,6 @@
             this.карноДНФToolStripMenuItem,
             this.карноКНФToolStripMenuItem,
             this.квайнМКДНФToolStripMenuItem,
-            this.квайнМККНФToolStripMenuItem,
             this.таблицаПокрытийToolStripMenuItem});
             this.добавитьЭлементToolStripMenuItem.Name = "добавитьЭлементToolStripMenuItem";
             this.добавитьЭлементToolStripMenuItem.Size = new System.Drawing.Size(120, 20);
@@ -105,15 +103,15 @@
             // 
             this.квайнМКДНФToolStripMenuItem.Name = "квайнМКДНФToolStripMenuItem";
             this.квайнМКДНФToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
-            this.квайнМКДНФToolStripMenuItem.Text = "Квайн М-К ДНФ";
+            this.квайнМКДНФToolStripMenuItem.Text = "Квайн М-К";
             this.квайнМКДНФToolStripMenuItem.Click += new System.EventHandler(this.квайнМКДНФToolStripMenuItem_Click);
             // 
-            // квайнМККНФToolStripMenuItem
+            // таблицаПокрытийToolStripMenuItem
             // 
-            this.квайнМККНФToolStripMenuItem.Name = "квайнМККНФToolStripMenuItem";
-            this.квайнМККНФToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
-            this.квайнМККНФToolStripMenuItem.Text = "Квайн М-К КНФ";
-            this.квайнМККНФToolStripMenuItem.Click += new System.EventHandler(this.квайнМККНФToolStripMenuItem_Click);
+            this.таблицаПокрытийToolStripMenuItem.Name = "таблицаПокрытийToolStripMenuItem";
+            this.таблицаПокрытийToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.таблицаПокрытийToolStripMenuItem.Text = "Таблица покрытий";
+            this.таблицаПокрытийToolStripMenuItem.Click += new System.EventHandler(this.таблицаПокрытийToolStripMenuItem_Click);
             // 
             // tabControl1
             // 
@@ -123,13 +121,6 @@
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(800, 426);
             this.tabControl1.TabIndex = 1;
-            // 
-            // таблицаПокрытийToolStripMenuItem
-            // 
-            this.таблицаПокрытийToolStripMenuItem.Name = "таблицаПокрытийToolStripMenuItem";
-            this.таблицаПокрытийToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
-            this.таблицаПокрытийToolStripMenuItem.Text = "Таблица покрытий";
-            this.таблицаПокрытийToolStripMenuItem.Click += new System.EventHandler(this.таблицаПокрытийToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -159,7 +150,6 @@
         private System.Windows.Forms.ToolStripMenuItem карноКНФToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem карноДНФToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem квайнМКДНФToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem квайнМККНФToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem таблицаПокрытийToolStripMenuItem;
     }
 }
